@@ -3,8 +3,8 @@
 ## 使用
 ### 安装必须的模块
 '''
-pip install requests,lxml,demjson
-import SafetreeApi
+    pip install requests,lxml,demjson
+    import SafetreeApi
 '''
 
 ## License
