@@ -1,0 +1,169 @@
+import requests
+import demjson
+from lxml.html import fromstring
+
+USER_AGENT = r'Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48Z) AppleWebKit/537.36 (KHTML, like' \
+             r' Gecko) Version/4.0 Chrome/39.0.0.0 Safari/537.36 safetreeapp/1.5.1'
+
+
+class LoginError(Exception):
+    def __init__(self):
+        Exception.__init__(self, "Wrong username or password")
+
+
+class GetHomeWorkError(Exception):
+    def __init__(self, data):
+        super().__init__(self, data)
+        self.data = data
+
+    def __str__(self):
+        return " UserId: " + self.data + "-> Can't get this user's Homework"
+
+
+class HomeworkError(Exception):
+    def __init__(self, data):
+        Exception.__init__(self, data)
+        self.data = data
+
+    def __str__(self):
+        return " UserId: " + self.data[0] + "-> Can't finish this user's SafeTips,Result :" + self.data[1]
+
+
+class GetTipsError(Exception):
+    def __init__(self, data):
+        super().__init__(self, data)
+        self.data = data
+
+    def __str__(self):
+        return " UserId: " + self.data + "-> Can't get this user's SafeTips"
+
+
+class ReadSafeTipsError(Exception):
+    def __init__(self, data):
+        super().__init__(self, data)
+        self.data = data
+
+    def __str__(self):
+        return " UserId: " + self.data[0] + "-> Can't read this user's SafeTip,Return StateCode:" + self.data[1]
+
+
+def login(username, password):
+    """Return User's all Information,Such as UserId,TureName and so on
+       Need User's Name and Password,please using type str
+    """
+    data = {
+        "Username": username,
+        "Password": password
+    }
+    Headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/json",
+        "Connection": "Keep-Alive"
+    }
+    # Send request to server to get User info
+    jsonText = requests.get("http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin", data=data,
+                            headers=Headers).text
+    # Make String to Dict
+    jsonDict = demjson.decode(jsonText)
+    if jsonDict['err_code'] or jsonDict['err_desc']:
+        raise LoginError
+    return jsonDict
+
+
+def GetAllStudentInforamtion():
+    return [1, 2, 3]
+
+
+def get_homework_list(userid, classroom, grade, cityid):
+    """This function will return a list with job name and URL dictionary
+        e.g : [{"WorkId":workId,"Name":Name,"Link":Link,"li":li,"gid":Gid}]
+    """
+    GetHomeWorkURL = "https://qingdao.xueanquan.com/webapi/jt/MyHomeWork.html"
+    data = {
+        "grade": grade,
+        "classroom": classroom,
+        "cityid": cityid
+    }
+    html = requests.get(GetHomeWorkURL, data).content.decode()
+    tree = fromstring(html)
+    NumberOfJobs = len(tree.xpath(r'//*[@id="mun_-1_1"]/tr'))
+    if not NumberOfJobs:
+        raise GetHomeWorkError(userid)
+    Homeworks = []
+    for index in range(1, NumberOfJobs + 1):
+        HomeworkJsCommand = tree.xpath(rf'//*[@id="mun_-1_1"]/tr[{index}]/td[7]/a/@onclick')[0]
+        HomeworkJsCommand = HomeworkJsCommand[HomeworkJsCommand.index('(') + 1:HomeworkJsCommand.index(')')]
+        if "https://huodong.xueanquan.com" in HomeworkJsCommand:
+            continue
+        Name = tree.xpath(rf'//*[@id="mun_-1_1"]/tr[{index}]/td[2]/div/a/text()')[0]
+        if '活动' in Name:
+            continue
+        _ = HomeworkJsCommand.split(',')
+        li, gid = (_[0], _[3])
+        li = li.strip()
+        gid = gid.strip()
+        Link = rf"https://qingdao.xueanquan.com/JiaTing/EscapeSkill/SeeVideo.aspx?gid={gid}&li={li}"
+        workId = tree.xpath(rf'//*[@id="mun_-1_1"]/tr[{index}]/td[7]/a/@name')[0]
+        workId = workId[workId.index('_') + 1:]
+        Homeworks.append({"WorkId": workId, "Name": Name, "Link": Link, "li": li, "gid": gid})
+    return Homeworks
+
+
+def finish_homework(workid, gid, li, userid, usertruename, grade, classroom, citycode):
+    URL = r"http://shandong.safetree.com.cn/CommonService.asmx/TemplateIn2"
+    data = {
+        "workid": workid,
+        "fid": gid,
+        "title": "",
+        "require": "",
+        "purpose": "",
+        "contents": "",
+        "testwanser": "0|0|0",
+        "testinfo": "已掌握技能",
+        "testMark": "100",
+        "testReulst": "1",
+        "SiteName": "",
+        "SiteAddrees": "",
+        "WatchTime": "",
+        "CourseID": li
+    }
+    cookies = {
+        "UserID": userid,
+        "RecordLoginInput_-1": usertruename,
+        "_UCodeStr": {
+            "Grade": grade,
+            "ClassRoom": classroom,
+            "CityCode": citycode
+        }
+    }
+    if demjson.decode(requests.get(URL, data, cookies=cookies).content.decode()) != "1":
+        raise HomeworkError
+
+
+def get_safetips(authorization, userid, pagesize):
+    data = {
+        "userId" : userid,
+        "parentSortId" : "2",
+        "beginIndex" : "0",
+        "pageSize" : pagesize
+    }
+    Header = {
+        "User-Agent": USER_AGENT,
+        "Authorization": "Bearer " + authorization,
+        "X-UserId": userid
+    }
+    URL = r"http://shandong.safetree.com.cn/safeapph5/api/noticeService/getMyReceive"
+    json = demjson.decode(requests.get(URL, data=data, headers=Header).content.decode())
+    if json["success"] == 0:
+        raise GetTipsError([userid, json["message"]])
+    return json
+
+
+def read_safetips(tipurl, userid):
+    cookies = {"UserId": userid}
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json, text/javascript, */*; q=0.01",
+               "X-Requested-With": "com.jzzs.ParentsHelper", "Connection": "Keep-alive",
+               "Accept-Language": "zh-CN,en-US;q=0.8"}
+    resp = requests.get(tipurl, headers=headers, cookies=cookies)
+    if resp.status_code != 200:
+        raise ReadSafeTipsError([userid, resp.status_code])
