@@ -68,9 +68,35 @@
 
 ## 所有值都位于login()返回的dict中，如遇非str类型请自行转换
 
+## 返回值
+    [{'Name': '让孩子学习如何与朋友相处',
+    'li': '948',
+    'gid': '493',
+    'workId': '1639449',
+    'url': 'https://qingdao.xueanquan.com/JiaTing/EscapeSkill/SeeVideo.aspx\\?gid=493&li=948'},
+    {'Name': '让孩子知道如何应对重大传染病疫情',
+    'li': '947',
+    'gid': '493',
+    'workId': '1638469',
+    'url': 'https://qingdao.xueanquan.com/JiaTing/EscapeSkill/SeeVideo.aspx\\?gid=493&li=947'},
+    {'Name': '帮助孩子了解并预防亚健康',
+    'li': '946',
+    'gid': '493',
+    'workId': '1544469',
+    'url': 'https://qingdao.xueanquan.com/JiaTing/EscapeSkill/SeeVideo.aspx\\?gid=493&li=946'},
+    {'Name': '学习预防性伤害的技巧',
+    'li': '945',
+    'gid': '493',
+    'workId': '1532142',
+    'url': 'https://qingdao.xueanquan.com/JiaTing/EscapeSkill/SeeVideo.aspx\\?gid=493&li=945'}]
+
 # 完成作业
+
 ## 此功能暂未验证！
+
     import safetreeApi
     safetreeApi.finish_homework()
+
 ## workid、li、gid位于get_homework_list返回的list中，accessCookie位于login()返回的dict中
+
 ## 部分参数请自行转化为str
