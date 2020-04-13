@@ -1,14 +1,14 @@
-#所有函数的参数都必须为str
+# 所有函数的参数都必须为str
 
-#Login
+# Login
     
-    `In[1]import SafetreeApi  
+    import SafetreeApi  
 
-    In[2]:SafetreeApi.login(yourUserName,Password)  
+    SafetreeApi.login(yourUserName,Password)  
 
-    #yourUserName,Password都为str类型  `
+    #yourUserName,Password都为str类型
 
-###返回值
+### 返回值
     
     {'data': 
       {'userId': str,
@@ -59,16 +59,16 @@
        'err_code': int,
        'err_desc': str}
 
-#获取作业
+# 获取作业
 
-    `import safetreeApi
-     safetreeApi.get_homework_list()`
+     import safetreeApi
+     safetreeApi.get_homework_list()
 
-##所有值都位于login()返回的dict中，如遇非str类型请自行转换
+## 所有值都位于login()返回的dict中，如遇非str类型请自行转换
 
-#完成作业
-##此功能暂未验证！
-    `import safetreeApi
-     safetreeApi.finish_homework()`
-##workid、li、gid位于get_homework_list返回的list中，accessCookie位于login()返回的dict中
-##部分参数请自行转化为str
+# 完成作业
+## 此功能暂未验证！
+    import safetreeApi
+    safetreeApi.finish_homework()
+## workid、li、gid位于get_homework_list返回的list中，accessCookie位于login()返回的dict中
+## 部分参数请自行转化为str
