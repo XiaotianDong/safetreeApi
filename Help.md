@@ -62,7 +62,7 @@
 
 ### get_homework_list(cityid,classroom,grade)
 
-## 所有值都位于login()返回的dict中，如遇非str类型请自行转换
+#### 所有值都位于login()返回的dict中
 
 ## 返回值
     [{'Name': '让孩子学习如何与朋友相处',
@@ -92,15 +92,13 @@
 
 ### finish_homework(workid,gid,li,accessCookie)
 
-## workid、li、gid位于get_homework_list返回的list中，accessCookie位于login()返回的dict中
-
-## 部分参数请自行转化为str
+#### workid、li、gid位于get_homework_list返回的list中，accessCookie位于login()返回的dict中
 
 # 获取安全提醒
 
 ## get_safetips(accessToken,accessCookie ,pagesize,plainUserId)
 
-## plainUserId,accessCookie,accessToken位于login()返回的dict中,pagesize为需要请求的条数,从最新一条开始
+#### plainUserId,accessCookie,accessToken位于login()返回的dict中,pagesize为需要请求的条数,从最新一条开始
 
 ### 返回值
 
@@ -164,4 +162,4 @@
 
 ## read_safetips(tipurl,accessToken,accessCookie)
 
-## accessCookie,accessToken位于login()返回的dict中,tipurl位于get_safetips()请求回的list中
+#### accessCookie,accessToken位于login()返回的dict中,tipurl位于get_safetips()请求回的list中
