@@ -1,7 +1,7 @@
 # 帮助文档
 
-# 所有函数的参数都必须为str
-# 本文档全部基于from safetreeApi import *
+## 所有函数的参数都必须为str
+## 本文档全部基于from safetreeApi import *
 
 # 登录
     
