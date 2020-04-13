@@ -103,7 +103,61 @@
 ## plainUserId,accessCookie,accessToken位于login()返回的dict中,pagesize为需要请求的条数,从最新一条开始
 
 ### 返回值
-    
+
+    {
+      "success": true,
+      "result": [
+         {
+            "messageID": 53686700,
+            "sortId": 10,
+            "sortName": "周末提醒",
+            "sortIcon": "http://file.safetree.com.cn/AppNotice/NavIco/AppNotice/I201703021912203329.jpg",
+            "title": "4月第2周 防溺无小事 家长须警惕（2020.4.7-4.12）",
+            "createUserName": "   ",
+            "createUserUnit": "   ",
+            "sendCount": 0,
+            "readCount": 0,
+            "sendTime": "2020-04-10 09:13:17",
+            "constraintAffirm": false,
+            "isRead": true,
+            "isShowDetail": true,
+            "redirectUrl": "https://file.safetree.com.cn/apph5/html/WarningNoticeDetial_v2_0.html?currentRT=1&currentUserRegion=0&PrvCode=26&SortId=10&result=53686700&host=https://qingdao.safetree.com.cn"
+        },
+        {
+            "messageID": 53173611,
+            "sortId": 11,
+            "sortName": "节假日提醒",
+            "sortIcon": "http://file.safetree.com.cn/AppNotice/NavIco/AppNotice/I201703021913011372.jpg",
+            "title": "【开学】开学季·安全记 安全防范要牢记",
+            "createUserName": "   ",
+            "createUserUnit": "   ",
+            "sendCount": 0,
+            "readCount": 0,
+            "sendTime": "2020-04-05 12:20:23",
+            "constraintAffirm": false,
+            "isRead": true,
+            "isShowDetail": true,
+            "redirectUrl": "https://file.safetree.com.cn/apph5/html/WarningNoticeDetial_v2_0.html?currentRT=1&currentUserRegion=0&PrvCode=26&SortId=11&result=53173611&host=https://qingdao.safetree.com.cn"
+        },
+        {
+            "messageID": 53112553,
+            "sortId": 11,
+            "sortName": "节假日提醒",
+            "sortIcon": "http://file.safetree.com.cn/AppNotice/NavIco/AppNotice/I201703021913011372.jpg",
+            "title": "【清明节】4月第1周 清明期间文明祭祀安全出行倡议书（2020.3.30-4.4）",
+            "createUserName": "   ",
+            "createUserUnit": "   ",
+            "sendCount": 0,
+            "readCount": 0,
+           "sendTime": "2020-04-02 09:27:26",
+           "constraintAffirm": false,
+           "isRead": true,
+           "isShowDetail": true,
+           "redirectUrl": "https://file.safetree.com.cn/apph5/html/WarningNoticeDetial_v2_0.html?currentRT=1&currentUserRegion=0&PrvCode=26&SortId=11&result=53112553&host=https://qingdao.safetree.com.cn"
+        }
+    ],
+      "message": "OK"
+    }
 
 
 # 完成安全提醒
