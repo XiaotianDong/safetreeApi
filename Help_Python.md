@@ -1,14 +1,14 @@
-# 帮助文档
+# 帮助文档 (Python版)
 
 ## 所有函数的参数都必须为str
 ## 本文档全部基于from safetreeApi import *
 
 # 登录
-    
+
 ### login(username,password)
 
 ### 返回值
-    
+
     {'data': 
       {'userId': str,
         'userName': str,
