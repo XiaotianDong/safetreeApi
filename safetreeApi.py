@@ -1,141 +1,100 @@
-import requests 
-import demjson
+import requests,demjson,re
 from lxml.html import fromstring
-import re
 
-#所有参数必须为str
+API = demjson.decode_file("API.json")
 
-USER_AGENT = r"Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48Z) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Safari/537.36 safetreeapp/1.5.1"
-
-
-
-def login(username,password):
-    """
-        此函数用于登录安全教育平台并返回userid等用户信息,
-        返回类型为字典.
-    """
-    LOGIN_URL = r"http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin"
-    header = {
-        "User-Agent": USER_AGENT,
-        "Accept": "application/json",
-        "Connection": "Keep-Alive",
-        "Content-Type":"application/json"
-    }
-    data ={
-        "Username": username,
-        "Password": password
-    }
-    resp = requests.post(LOGIN_URL,data=demjson.encode(data),headers=header)
-    User_information = demjson.decode(resp.text)
-    return User_information
-
-
-def get_homework_list(cityid,classroom,grade):
-    """
-        此函数将返回一个有所有作业详细信息字典的列表，
-    """
-    GET_HOMEWORK_URL = "https://qingdao.xueanquan.com/webapi/jt/MyHomeWork.html"
-    data = {
-        "grade": grade,
-        "classroom": classroom,
-        "cityid": cityid
-    }
-    _ = requests.get(GET_HOMEWORK_URL,data=data).content.decode()
-    tree = fromstring(_)
-    #获取作业数量
-    _ = len(tree.xpath(r'//*[@id="mun_-1_1"]/tr'))
-    homeworks = []
-    for index in range(1,_+1):
-        homework = {}
-        HomeworkJsCommand = tree.xpath(rf'//*[@id="mun_-1_1"]/tr[{index}]/td[7]/a/@onclick')[0]
-        HomeworkJsCommand = HomeworkJsCommand[HomeworkJsCommand.index('(')+1:HomeworkJsCommand.index(')')]
-        #跳过活动项目
-        _ = tree.xpath(rf'//*[@id="mun_-1_1"]/tr[{index}]/td[2]/div/a/text()')[0]
-        if "https://huodong.xueanquan.com" in HomeworkJsCommand:
-            continue
-        if "活动" in _:
-            continue
-        homework["Name"] = _
-        #添加作业的li和gid属性
-        _ = HomeworkJsCommand.split(",")
-        homework["li"] = _[0].strip()
-        homework["gid"] = _[3].strip()
-        _ = tree.xpath(rf'//*[@id="mun_-1_1"]/tr[{index}]/td[7]/a/@name')[0]
-        homework["workId"] = _[_.index("_")+1:]
-        _ = rf"https://qingdao.xueanquan.com/JiaTing/EscapeSkill/SeeVideo.aspx\?gid={homework['gid']}&li={homework['li']}"
-        homework["url"] = _
-        homeworks.append(homework)
-    return homeworks
+class user:
+    def __init__(self,username,password):
+       # 登陆并获取用户信息
+        header = {
+            "User-Agent": API["User_Agent"],
+            "Accept": "application/json",
+            "Connection": "Keep-Alive",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "Username": username,
+            "Password": password
+        }
+        _ = requests.post(API["Login_URL"],data=demjson.encode(data),headers=header).text
+        User_information = demjson.decode(_)
+        self.accessToken = User_information["data"]["accessToken"]
+        self.accessCookie = User_information["data"]["accessCookie"]
+        self.plainUserId = str(User_information["data"]["plainUserId"])
+        self.Grade = str(User_information['data']["grade"])
+        self.cityId = str(User_information['data']['cityId'])
+        self.classroom = str(User_information['data']['classroomId'])
+        self.trueName = User_information['data']['nickName']
+        del User_information
+    def get_user_true_name(self):
+        return self.trueName
+    def get_homework(self):
+        cookies = {
+            "UserID":self.accessCookie
+        }
+        html = requests.get(API["Get_Homework_URL"],cookies=cookies).text
+        tree = fromstring(html)
+        homeworks = []
+        for index in range(len(tree.xpath('//*[@id="setven_3"]/li'))):
+            Is_finished = False
+            url = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/@href')[0]
+            name = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/p/text()')[0]
+            if tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/span[2]'):
+                Is_finished = True
+            if "【安全学习】" not in name:
+                continue
+            homeworks.append(homework(url,name,Is_finished))
 
 
-def finish_homework(workid,gid,li,accessCookie):
-    """
-        此函数用于完成指定学生的指定作业。(未验证)
-    """
-    URL = r"http://shandong.safetree.com.cn/CommonService.asmx/TemplateIn2"
 
-    data = {
-        "workid":workid,
-        "fid":gid,
-        "title":"",
-        "require":"",
-        "purpose":"",
-        "contents":"",
-        "testwanser":"0|0|0",
-        "testinfo":"已掌握技能",
-        "testMark":"100",
-        "testReulst":"1",
-        "SiteName":"",
-        "SiteAddrees":"",
-        "WatchTime":"",
-        "CourseID":li
-    }
-
-    cookies = {
-        "UserID":accessCookie,
-    }
-
-    _ = requests.get(URL,data=data,cookies = cookies).content.decode()
-    return True
-
-
-def get_safetips(accessToken,accessCookie ,pagesize,plainUserId):
-    """
-        This function will return a dictionary with the safety reminder of the input student,
-        the content has the safety reminder URL, name, etc.
-    """
-    accessCookie = str(accessCookie)
-    request_header = {
-        "User-Agent": USER_AGENT,
-        "Authorization": "Bearer " + accessToken,
-        "X-UserId": str(plainUserId)
-    }
-    data = {
-        "userId":accessCookie,
-        "parentSortId":"2",
-        "beginIndex":"0",
-        "pageSize":pagesize
-    }
-    login_url = r"http://shandong.safetree.com.cn/safeapph5/api/noticeService/getMyReceive"
-    resp = requests.get(login_url,data=data,headers=request_header)
-    json = demjson.decode(resp.content.decode())
-    return json
+class homework:
+    def __init__(self,url,name,Is_finish):
+        result = re.findall("gid=(.+?)&li=(.+?)",url)
+        self.gid = result[0]
+        self.li = result[1]
+        self.name = name
+        self.Is_finish = Is_finish
+    def finish_homework(self,user):
+        if self.Is_finish:
+            print("It already Finished.")
+            return True
+        URL = f"https://qingdao.xueanquan.com/PhoneEpt/SkillQuestionList.aspx?course={str(self.li)}&from="
+        html = requests.get(URL).text
+        workid = re.findall("workid:(.?+),", html)[0]
+        data = {
+            "workid": str(workid),
+            "fid": str(self.gid),
+            "title": "",
+            "require": "",
+            "purpose": "",
+            "contents": "",
+            "testwanser": "0|0|0",
+            "testinfo": "已掌握技能",
+            "testMark": "100",
+            "testReulst": "1",
+            "SiteAddrees": "",
+            "SiteName": "",
+            "watchTime": "",
+            "CourseID": self.li
+        }
+        cookies = {
+            "UserID": user.accessCookie
+        }
+        #教育平台这个POST估计是遗留问题。。。。
+        #之前应该用的是GET，现在POST必须在URL里写data并POSTdata，
+        #否则在Postman里报错了？？？？？？？
+        URL = API["Finish_Homework_URL"]+f"?workid={str(workid)}&fid={str(self.gid)}&title=&require=&"\
+              f"purpose=&contents=&testwanser=0|0|0&testMark=100&testinfo=已掌握技能&testReulst=1&SiteAddrees"\
+              f"=&SiteName=&watchTime=&CourseID={self.li}"
+        return demjson.decode(requests.post(URL, data=data, cookies=cookies).text)
+        #可将此行替换为:
+        # # requests.post(URl,data=data,cookies=cookies)
 
 
-def read_safetips(tipurl,accessToken,accessCookie):
-    """
-        此函数用于自动阅读安全提醒
-    """
-    noticeId = tipurl[tipurl.index("result=")+7:tipurl.index("&host")]
-    url = r"https://qingdao.safetree.com.cn/safeapph5/api/notice/getByIdNoticeMessageDetails"
-    data = {
-        "id":noticeId,
-        "messageRead":"true"
-    }
-    headers = {
-        "User-Agent":USER_AGENT,
-        "X-UserId":accessCookie,
-        "Authorization":"Bearer "+accessToken
-    }
-    resp = requests.get(url, headers=headers, data=data)
-    return demjson.decode(resp.content.decode())
+class safetips:
+    pass
+
+
+if __name__ == "__main__":
+    user_class = user("dongxiaotian","123456qw")
+    print(user_class.get_user_true_name())
