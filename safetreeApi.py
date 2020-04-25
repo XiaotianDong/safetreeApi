@@ -1,7 +1,9 @@
 import requests,demjson,re
 from lxml.html import fromstring
 
+
 API = demjson.decode_file("API.json")
+
 
 class user:
     def __init__(self,username,password):
@@ -26,15 +28,19 @@ class user:
         self.classroom = str(User_information['data']['classroomId'])
         self.trueName = User_information['data']['nickName']
         del User_information
+
+
     def get_user_true_name(self):
         return self.trueName
+
+
     def get_homework(self):
         cookies = {
             "UserID":self.accessCookie
         }
         html = requests.get(API["Get_Homework_URL"],cookies=cookies).text
         tree = fromstring(html)
-        homeworks = []
+        self.homeworks = []
         for index in range(len(tree.xpath('//*[@id="setven_3"]/li'))):
             Is_finished = False
             url = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/@href')[0]
@@ -43,8 +49,23 @@ class user:
                 Is_finished = True
             if "【安全学习】" not in name:
                 continue
-            homeworks.append(homework(url,name,Is_finished))
+            self.homeworks.append(homework(url,name,Is_finished))
 
+
+    def get_safetips(self,pagesize):
+        URL = API["Get_Tips_URL"]+f"?userId={self.accessCookie}&parentSortId=2&beginIndex=0&pageSize={pagesize}"
+        header={
+            "User-Agent": API["User_Agent"],
+            "Authorization": "Bearer "+self.accessToken,
+            "X-UserId": self.plainUserId
+        }
+        resp = requests.get(URL,headers=header)
+        tips = demjson.decode(resp.text)
+        self.safetips = []
+        if not tips["success"]:
+            raise RuntimeError(tips["message"])
+        for tip in tips['result']:
+           self.safetips.append(safetips(name=tip["title"],messageId=tip['messageID'],Is_read=tip['isRead']))
 
 
 class homework:
@@ -54,6 +75,8 @@ class homework:
         self.li = result[1]
         self.name = name
         self.Is_finish = Is_finish
+
+
     def finish_homework(self,user):
         if self.Is_finish:
             print("It already Finished.")
@@ -92,9 +115,21 @@ class homework:
 
 
 class safetips:
-    pass
+    def __init__(self,name,messageId,Is_read):
+        self.messageId = ""
+        self.name = ""
+        self.Is_read = Is_read
 
 
-if __name__ == "__main__":
-    user_class = user("dongxiaotian","123456qw")
-    print(user_class.get_user_true_name())
+    def ReadTips(self,user):
+        if self.Is_read:
+            print("It already read")
+            return True
+        URL = API["Read_Tips_URL"]+f"?id={self.messageId}&messageRead=true"
+        header = {
+            "User-Agent": API["User_Agent"],
+            "X-UserId":user.accessCookie,
+            "Authorization": f"Bearer {user.accessToken}"
+        }
+        resp = requests.get(URL,headers=header)
+        return demjson.decode(resp.text)
