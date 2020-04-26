@@ -31,4 +31,11 @@
     tips[0].ReadTips(user)
 
 
-​    
+## 缓存功能
+    import safetreeApi as sf
+    #登录
+    user = sf.user("EXAMPLE_USER","EXAMPLE_PASSWORD")
+    #新建缓存文件
+    user.write_Cache(FILE_PATH)
+    #读取缓存
+    user = sf.user(UsingCache=True,CacheFile=FILE_PATH)
