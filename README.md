@@ -1,7 +1,7 @@
 # safetreeApi
 
 ## 使用前安装必须的模块
-    pip install requests,lxml,demjson
+    pip install -r requirement.txt
 
 
 ## License
