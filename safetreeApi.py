@@ -6,27 +6,34 @@ API = demjson.decode_file("API.json")
 
 
 class user:
-    def __init__(self,username,password):
-       # 登陆并获取用户信息
-        header = {
-            "User-Agent": API["User_Agent"],
-            "Accept": "application/json",
-            "Connection": "Keep-Alive",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "Username": username,
-            "Password": password
-        }
-        _ = requests.post(API["Login_URL"],data=demjson.encode(data),headers=header).text
-        User_information = demjson.decode(_)
-        self.accessToken = User_information["data"]["accessToken"]
-        self.accessCookie = User_information["data"]["accessCookie"]
-        self.plainUserId = str(User_information["data"]["plainUserId"])
-        self.Grade = str(User_information['data']["grade"])
-        self.cityId = str(User_information['data']['cityId'])
-        self.classroom = str(User_information['data']['classroomId'])
-        self.trueName = User_information['data']['nickName']
+    def __init__(self,username=None,password=None,UsingCache=False,CacheFile=None):
+        User_information = {}
+        if UsingCache:
+            User_information = demjson.decode_file(CacheFile)
+        else:
+            # 登陆并获取用户信息
+            header = {
+                "User-Agent": API["User_Agent"],
+                "Accept": "application/json",
+                "Connection": "Keep-Alive",
+                "Content-Type": "application/json"
+                }
+            data = {
+                 "Username": username,
+                 "Password": password
+                }
+            _ = requests.post(API["Login_URL"],data=demjson.encode(data),headers=header).text
+            try:
+                User_information = demjson.decode(_)['data']
+            except KeyError:
+                raise RuntimeError("登录失败，请检查用户名与密码")
+        self.accessToken = User_information["accessToken"]
+        self.accessCookie = User_information["accessCookie"]
+        self.plainUserId = str(User_information["plainUserId"])
+        self.Grade = str(User_information["grade"])
+        self.cityId = str(User_information['cityId'])
+        self.classroom = str(User_information['classroomId'])
+        self.trueName = User_information['nickName']
         del User_information
 
 
@@ -66,6 +73,19 @@ class user:
             raise RuntimeError(tips["message"])
         for tip in tips['result']:
            self.safetips.append(safetips(name=tip["title"],messageId=tip['messageID'],Is_read=tip['isRead']))
+    def write_Cache(self,filepath):
+        f = open(filepath,"w")
+        data = {
+            "accessToken": self.accessToken,
+            "accessCookie": self.accessCookie,
+            "plainUserId": self.plainUserId,
+            "grade": self.Grade,
+            "classroomId": self.classroom,
+            "cityId": self.cityId,
+            "nickName": self.trueName
+        }
+        f.write(demjson.encode(data))
+        f.close()
 
 
 class homework:
