@@ -2,8 +2,14 @@ import requests,demjson,re
 from lxml.html import fromstring
 
 
-API = demjson.decode_file("API.json")
-
+API = {
+    "User_Agent": "Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48Z) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Safari/537.36 safetreeapp/1.5.1",
+    "Login_URL": "http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin",
+    "Get_Homework_URL": "https://qingdao.xueanquan.com/PhoneEpt/NewMyHomeWork.aspx",
+    "Finish_Homework_URL": "http://qingdao.xueanquan.com//CommonService.asmx/TemplateIn2",
+    "Get_Tips_URL": "http://shandong.safetree.com.cn/safeapph5/api/noticeService/getMyReceive",
+    "Read_Tips_URL": "https://qingdao.safetree.com.cn/safeapph5/api/notice/getByIdNoticeMessageDetails"
+}
 
 class user:
     def __init__(self,username=None,password=None,UsingCache=False,CacheFile=None):
