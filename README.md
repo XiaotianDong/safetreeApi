@@ -1,5 +1,8 @@
 # safetreeApi
 
+# 目前只保证qingdao.xueanquan.com可用，后期将添加地域支持
+
+
 ## 使用前安装必须的模块
     pip install -r requirement.txt
 
