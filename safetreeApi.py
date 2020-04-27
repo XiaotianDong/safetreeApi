@@ -54,7 +54,7 @@ class user:
         html = requests.get(API["Get_Homework_URL"],cookies=cookies).text
         tree = fromstring(html)
         self.homeworks = []
-        for index in range(len(tree.xpath('//*[@id="setven_3"]/li'))):
+        for index in range(1,len(tree.xpath('//*[@id="setven_3"]/li'))+1):
             Is_finished = False
             url = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/@href')[0]
             name = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/p/text()')[0]
@@ -63,6 +63,7 @@ class user:
             if "【安全学习】" not in name:
                 continue
             self.homeworks.append(homework(url,name,Is_finished))
+        return self.homeworks
 
 
     def get_safetips(self,pagesize):
@@ -97,8 +98,8 @@ class user:
 class homework:
     def __init__(self,url,name,Is_finish):
         result = re.findall("gid=(.+?)&li=(.+?)",url)
-        self.gid = result[0]
-        self.li = result[1]
+        self.gid = result[0][0]
+        self.li = result[0][1]
         self.name = name
         self.Is_finish = Is_finish
 
@@ -159,3 +160,7 @@ class safetips:
         }
         resp = requests.get(URL,headers=header)
         return demjson.decode(resp.text)
+
+u = user("dongxiaotian","123456qw")
+_ = u.get_homework()
+_[0].finish_homework(u)
