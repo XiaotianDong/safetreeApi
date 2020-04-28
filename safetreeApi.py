@@ -58,7 +58,7 @@ class user:
             Is_finished = False
             url = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/@href')[0]
             name = tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/p/text()')[0]
-            if tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/span[2]'):
+            if tree.xpath(f'//*[@id="setven_3"]/li[{index}]/a/span[2]/text()')[0] == "已完成":
                 Is_finished = True
             if "【安全学习】" not in name:
                 continue
@@ -97,7 +97,7 @@ class user:
 
 class homework:
     def __init__(self,url,name,Is_finish):
-        result = re.findall("gid=(.+?)&li=(.+?)",url)
+        result = re.findall(r"gid=(.+?)&li=(.+?)\b",url)
         self.gid = result[0][0]
         self.li = result[0][1]
         self.name = name
@@ -108,9 +108,17 @@ class homework:
         if self.Is_finish:
             print("It already Finished.")
             return True
+        cookies = {
+            "UserID": user.accessCookie
+        }
         URL = f"https://qingdao.xueanquan.com/PhoneEpt/SkillQuestionList.aspx?course={str(self.li)}&from="
-        html = requests.get(URL).text
-        workid = re.findall("workid:(.?+),", html)[0]
+        html = requests.get(URL, cookies=cookies).content.decode()
+        #替换特殊字符以便后期查找workID
+        js = fromstring(html).xpath('/html/head/script[10]/text()')[0]
+        js = js[js.index("data: {"):]
+        js = js[:js.index("}")]
+        js = js.replace("\\n","").replace("\\r","").replace("\r","").replace("\n","")
+        workid = re.findall("workid:(.+?),",js)[0]
         data = {
             "workid": str(workid),
             "fid": str(self.gid),
@@ -126,9 +134,6 @@ class homework:
             "SiteName": "",
             "watchTime": "",
             "CourseID": self.li
-        }
-        cookies = {
-            "UserID": user.accessCookie
         }
         #教育平台这个POST估计是遗留问题。。。。
         #之前应该用的是GET，现在POST必须在URL里写data并POSTdata，
@@ -160,7 +165,3 @@ class safetips:
         }
         resp = requests.get(URL,headers=header)
         return demjson.decode(resp.text)
-
-u = user("dongxiaotian","123456qw")
-_ = u.get_homework()
-_[0].finish_homework(u)
