@@ -1,14 +1,12 @@
 ************* Module safetreeApi
 safetreeApi.py:1:0: C0103: Module name "safetreeApi" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:52:8: C0103: Attribute name "accessToken" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:53:8: C0103: Attribute name "accessCookie" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:54:8: C0103: Attribute name "plainUserId" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:141:8: C0103: Attribute name "li" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:162:8: C0103: Variable name "URL" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:189:8: C0103: Variable name "URL" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:204:8: C0103: Attribute name "messageId" doesn't conform to snake_case naming style (invalid-name)
-safetreeApi.py:212:8: C0103: Variable name "URL" doesn't conform to snake_case naming style (invalid-name)
+safetreeApi.py:53:8: C0103: Attribute name "accessToken" doesn't conform to snake_case naming style (invalid-name)
+safetreeApi.py:54:8: C0103: Attribute name "accessCookie" doesn't conform to snake_case naming style (invalid-name)
+safetreeApi.py:55:8: C0103: Attribute name "plainUserId" doesn't conform to snake_case naming style (invalid-name)
+safetreeApi.py:143:8: C0103: Attribute name "li" doesn't conform to snake_case naming style (invalid-name)
+safetreeApi.py:164:8: C0103: Variable name "URL" doesn't conform to snake_case naming style (invalid-name)
+safetreeApi.py:208:8: C0103: Attribute name "messageId" doesn't conform to snake_case naming style (invalid-name)
 
 -------------------------------------------------------------------
-Your code has been rated at 9.02/10 (previous run: 10.00/10, -0.98)
+Your code has been rated at 9.26/10 (previous run: 10.00/10, -0.74)
 

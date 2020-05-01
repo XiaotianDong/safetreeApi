@@ -1,4 +1,4 @@
-"""安全教育平台API   暂只支持qingdao.xueanquan.com    Update Time 2020/4/28"""
+"""安全教育平台API   暂只支持qingdao.xueanquan.com    Update Time 2020/5/1"""
 
 import re
 import requests
@@ -7,15 +7,31 @@ from lxml.html import fromstring
 
 
 API = {
-    "User_Agent": "Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48Z) AppleWebKit"\
-                  "/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Safari/537.36 safetreeapp"\
-                  "/1.5.1",
+    "User_Agent": "Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48Z)"\
+                  "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 "\
+                  "Safari/537.36 safetreeapp/1.5.1",
     "Login_URL": "http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin",
     "Get_Homework_URL": "https://qingdao.xueanquan.com/PhoneEpt/NewMyHomeWork.aspx",
-    "Finish_Homework_URL": "http://qingdao.xueanquan.com//CommonService.asmx/TemplateIn2",
+    "Finish_Homework_URL": "https://qingdao.xueanquan.com/PhoneEpt/SkillQuestionList.aspx",
     "Get_Tips_URL": "http://shandong.safetree.com.cn/safeapph5/api/noticeService/getMyReceive",
-    "Read_Tips_URL": "https://qingdao.safetree.com.cn/safeapph5/api/notice/getByIdNoticeMessageDetails"
+    "Read_Tips_URL": "https://qingdao.safetree.com.cn/safeapph5/api/notice/"\
+                     "getByIdNoticeMessageDetails",
+    "Read_Tips_Referer":"https://file.safetree.com.cn/apph5/html/WarningNoticeDetial_v2_0.html"
 }
+
+
+def url_stitching(url,args):
+    """用于拼接URL，e.g : url_stiching("baidu.com",{"q":"test"})"""
+
+    _ = args.items() 
+    url += f"?{_[0][0]}={_[0][1]}"
+    del _[0]
+    loop_num = 0
+    while _:
+        url += f"&{_[loop_num][0]}={_[loop_num][1]}"
+        loop_num = 0
+    return url
+
 
 class User:
     """
@@ -55,8 +71,10 @@ class User:
         self.information = {
             "Grade": str(user_information["grade"]),
             "cityId": str(user_information['cityId']),
+            "prvid": str(user_information["prvId"]),
             "classroom": str(user_information['classroomId']),
-            "trueName": user_information['nickName']
+            "trueName": user_information['nickName'],
+            "ServerSide": user_information["webUrl"]
         }
         self.homeworks = []
         self.safetips = []
@@ -91,8 +109,13 @@ class User:
         获取安全提醒
         pagesize 获取数量
         """
-        tips_url = API["Get_Tips_URL"]+f"?userId={self.accessCookie}&parentSortId=2"\
-                   f"&beginIndex=0&pageSize={pagesize}"
+        url_argvs = {
+            "userId": self.accessCookie,
+            "parentSortId": "2",
+            "beginIndex": "0",
+            "pageSize": pagesize
+        }
+        tips_url = url_stitching(API["Get_Tips_URL"],url_argvs)
         header = {
             "User-Agent": API["User_Agent"],
             "Authorization": "Bearer "+self.accessToken,
@@ -103,7 +126,8 @@ class User:
         if not tips["success"]:
             raise RuntimeError(tips["message"])
         for tip in tips['result']:
-            self.safetips.append(Safetips(name=tip["title"], messageId=tip['messageID'], is_read=tip['isRead']))
+            _ = Safetips(name=tip["title"], messageId=tip['messageID'], is_read=tip['isRead'], sortId = tip["sortId"])
+            self.safetips.append(_)
 
 
     def write_cache(self, filepath):
@@ -159,13 +183,18 @@ class Homework:
         cookies = {
             "UserID": user_info.accessCookie
         }
-        URL = f"https://qingdao.xueanquan.com/PhoneEpt/SkillQuestionList.aspx?course={str(self.li)}&from="
+        url_argvs = {
+            "course": self.li,
+            "from": ""
+        }
+        URL = url_stitching(API["Finish_Homework_URL"], url_argvs)
         html = requests.get(URL, cookies=cookies).content.decode()
         #替换特殊字符以便后期查找workID
         js_command = fromstring(html).xpath('/html/head/script[10]/text()')[0]
         js_command = js_command[js_command.index("data: {"):]
         js_command = js_command[:js_command.index("}")]
-        js_command = js_command.replace("\\n", "").replace("\\r", "").replace("\r", "").replace("\n", "")
+        js_command = js_command.replace("\\n", "").replace("\\r", "").replace("\r", "")
+        js_command = js_command.replace("\n", "")
         workid = re.findall("workid:(.+?),", js_command)[0]
         data = {
             "workid": str(workid),
@@ -186,17 +215,31 @@ class Homework:
         #教育平台这个POST估计是遗留问题。。。。
         #之前应该用的是GET，现在POST必须在URL里写data并POSTdata，
         #否则在Postman里报错了？？？？？？？
-        URL = API["Finish_Homework_URL"]+f"?workid={str(workid)}&fid={str(self.gid)}&title=&require=&"\
-              f"purpose=&contents=&testwanser=0|0|0&testMark=100&testinfo=已掌握技能&testReulst=1&SiteAddrees"\
-              f"=&SiteName=&watchTime=&CourseID={self.li}"
-        return demjson.decode(requests.post(URL, data=data, cookies=cookies).text)
+        url_argvs = {
+            "workid": workid,
+            "fid": self.gid,
+            "title": " ",
+            "require": " ",
+            "purpose": " ",
+            "contents": " ",
+            "testwanser": "0|0|0",
+            "testMark": "100",
+            "testinfo": "已掌握技能",
+            "testReulst": "1",
+            "SiteAddrees": " ",
+            "SiteName": " ",
+            "watchTime": " ",
+            "CourseID": self.li
+        }
+        get_homework_url = url_stitching(API["Finish_Homework_URL"], url_argvs)
+        return demjson.decode(requests.post(get_homework_url, data=data, cookies=cookies).text)
         #可将此行替换为:
         #requests.post(URl,data=data,cookies=cookies)
 
 
 class Safetips:
     """安全提醒"""
-    def __init__(self, name, messageId, is_read):
+    def __init__(self, name, messageId, is_read, sortId):
         """
         name 名称
         is_read 阅读状态
@@ -204,19 +247,39 @@ class Safetips:
         self.messageId = messageId
         self.name = name
         self.is_read = is_read
+        self.sortId = sortId
+
+
     def read_tips(self, user_info):
         """阅读安全提醒"""
-        if self.is_read:
-            print("It already read")
-            return True
-        URL = API["Read_Tips_URL"]+f"?id={self.messageId}&messageRead=true"
-        header = {
-            "User-Agent": API["User_Agent"],
-            "X-UserId":user_info.accessCookie,
-            "Authorization": f"Bearer {user_info.accessToken}"
+        url_argvs = {
+            "currentRT": "1",
+            "currentUserRegion": "0",
+            "PrvCode": user_info.information["prvId"],
+            "SortId": self.sortId,
+            "result": self.messageId,
+            "host": r"https://qingdao.safetree.com.cn"
         }
-        resp = requests.get(URL, headers=header)
-        return demjson.decode(resp.text)
+        headers = {
+            "User-Agent": API["User_Agent"],
+            "Accept-Encoding": "gzip, deflate",
+            "Accept-Language": "zh-CN,en-US;q=0.8",
+            "Referer": url_stitching(API["Read_Tips_Referer"], url_argvs),
+            "X-Requested-With": "com.jzzs.ParentsHelper",
+            "Accept": "application/json, text/javascript, */*; q=0.01"
+        }
+        cookies = {
+            "UserID": user_info.accessCookie,
+            "ServerSide": user_info.information["ServerSide"]
+        }
+        url_argvs = {
+            "id": self.messageId,
+            "messageRead": " "
+        }
+        read_tip_url = url_stitching(API["Read_Tips_URL"], url_argvs)
+        resp_obj = requests.get(read_tip_url, headers = headers, cookies = cookies)
+        return demjson.decode(resp_obj.text)
+
     def get_name(self):
         """获取安全提醒名称"""
         return self.name
