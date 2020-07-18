@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 pylint.conf
+node_modules/
+preview/
