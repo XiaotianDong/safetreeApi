@@ -1,41 +1,67 @@
 # 帮助文档
 
-### 4-25更新
+Update Time: 7-19
 
-## 登录、查询作业/安全提醒:
+### 本文档全部基于：
 
-    import safetreeApi as sf
-    #登录
-    #返回user类
-    user = sf.user("EXAMPLE_USER","EXAMPLE_PASSWORD")
-    # 获取作业
-    #返回列表，列表内为homework类
-    homeworks = user.get_homework()
-    #获取安全提醒
-    #pagesize为需要请求的数量，从最新一个开始
-    #返回内为safetip类的列表
-    safetips = user.get_safetips(self,pagesize)
+```python
+ from safetreeApi import  *
+```
 
-## 完成安全作业/阅读安全提醒
+## 登陆
 
-    import safetreeApi as sf
-    #登录
-    user = sf.user("EXAMPLE_USER","EXAMPLE_PASSWORD")
-    #获取作业
-    homeworks = user.get_homework()
-    #完成作业其中之一
-    homeworks[0].finish_homework(user)
-    #获取安全提醒
-    tips = user.get_safetips(pagesize)
-    #阅读其中之一
-    tips[0].ReadTips(user)
+```python
+User(username, password) #登录并返回User对象
+```
 
+```
+In[0]: u = User("USER_NAME","USER_PASSWORD")
+In[1]: u
+Out[1]: <safetreeApi.User at 0x8ccf748> 
+```
 
-## 缓存功能
-    import safetreeApi as sf
-    #登录
-    user = sf.user("EXAMPLE_USER","EXAMPLE_PASSWORD")
-    #新建缓存文件
-    user.write_Cache(FILE_PATH)
-    #读取缓存
-    user = sf.user(UsingCache=True,CacheFile=FILE_PATH)
+## 获取作业
+
+```python
+User.get_homeworks()
+```
+
+```
+In[0]: User.get_homeworks()
+In[1]: User.homeworks
+Out[1]: [{..},{..},..]
+```
+
+## 获取安全提醒
+
+```python
+User.get_safetips(pagesize) #默认为10
+```
+
+```
+In[0]: User.get_safetips() //pagesize为需请求安全提醒数量
+In[1]: User.safetips
+Out[1]: [{..},{..},....]
+In[2]: len(User.safetips)
+Out[2]: 10
+```
+
+## 完成作业
+
+```python
+User.finish_Homework(homework) #homework为User.homeworks中的任意字典或符合其规范的任一字典
+```
+
+```
+In[0]: User.finish_Homework(homework)
+out[0]: True
+```
+
+## 完成安全提醒
+
+```python
+User.read_tips(tip) #tip为User.safetips中的任意字典或符合其规范的任一字典
+```
+
+#### 暂未实现
+

@@ -11,7 +11,7 @@ DEBUG = False
 
 
 def set_Debug_state(state):
-    globals DEBUG
+    global DEBUG
     DEBUG = True
 
 def url_stitching(url, args):
@@ -27,8 +27,8 @@ def url_stitching(url, args):
 
 
 class User:
-    self.homeworks = []
-    self.safetips = []
+    homeworks = []
+    safetips = []
     def __init__(self, username=None, password=None):
         LOGIN_URL = "http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin"
         self.user_information = dict()
@@ -43,14 +43,15 @@ class User:
             "Password": password
         }
         try:
-            self.user_information = demjson.decode(requests.post(Login_URL, data=demjson.encode(data), headers=header).text)
+            self.user_information = demjson.decode(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)['data']
         except:
-            raise RuntimeError("登录失败")
             if DEBUG:
                 with open("DebugLog.txt",'w+') as f:
                     f.write("ERROR:\t Body Message:")
                     f.write(requests.post(Login_URL, data=demjson.encode(data), headers=header).text)
                     f.write("\n at Login time \n")
+            raise RuntimeError("登录失败")
+
 
 
     def get_homeworks(self):
@@ -103,6 +104,8 @@ class User:
             }
             self.safetips.append(tip_information)
         return True
+
+
     def finish_Homework(self, homework):
         FINISH_HOMEWORK_URL = "https://qingdao.xueanquan.com/PhoneEpt/SkillQuestionList.aspx"
         gid, li = re.findall(r"gid=(.+?)&li=(.+?)\b", homework['URL'])[0]
@@ -116,7 +119,7 @@ class User:
             "from": ""
         }
         Final_URL = url_stitching(FINISH_HOMEWORK_URL, url_argvs)
-        html = requests.get(URL, cookies=cookies).content.decode()
+        html = requests.get(Final_URL, cookies=cookies).content.decode()
         #替换特殊字符以便后期查找workID
         js_command = fromstring(html).xpath('/html/head/script[10]/text()')[0]
         js_command = js_command[js_command.index("data: {"):]
@@ -161,6 +164,7 @@ class User:
         }
         get_homework_url = url_stitching(FINISH_HOMEWORK_URL, url_argvs)
         return requests.post(get_homework_url, data=data, cookies=cookies)
+
 
     def read_tips(self, tip):
         # API Error ,researching New API
