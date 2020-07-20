@@ -48,7 +48,7 @@ class User:
             if DEBUG:
                 with open("DebugLog.txt",'w+') as f:
                     f.write("ERROR:\t Body Message:")
-                    f.write(requests.post(Login_URL, data=demjson.encode(data), headers=header).text)
+                    f.write(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)
                     f.write("\n at Login time \n")
             raise RuntimeError("登录失败")
 
@@ -121,7 +121,7 @@ class User:
         Final_URL = url_stitching(FINISH_HOMEWORK_URL, url_argvs)
         html = requests.get(Final_URL, cookies=cookies).content.decode()
         #替换特殊字符以便后期查找workID
-        js_command = fromstring(html).xpath('/html/head/script[10]/text()')[0]
+        js_command = fromstring(html).xpath('//script[11]/text()')[0]
         js_command = js_command[js_command.index("data: {"):]
         js_command = js_command[:js_command.index("}")]
         js_command = js_command.replace("\\n", "").replace("\\r", "").replace("\r", "")
@@ -163,9 +163,16 @@ class User:
             "CourseID": str(li)
         }
         get_homework_url = url_stitching(FINISH_HOMEWORK_URL, url_argvs)
+        homework['State'] = True
         return requests.post(get_homework_url, data=data, cookies=cookies)
 
 
     def read_tips(self, tip):
         # API Error ,researching New API
         pass
+
+
+u = User("dongxiaotian","123456qw")
+u.get_homeworks()
+u.homeworks[0]['State'] = False
+u.finish_Homework(u.homeworks[0])
