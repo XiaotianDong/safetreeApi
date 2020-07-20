@@ -9,11 +9,6 @@ User_Agent = "Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48
 
 DEBUG = False
 
-
-def set_Debug_state(state):
-    global DEBUG
-    DEBUG = True
-
 def url_stitching(url, args):
     """用于拼接URL，e.g : url_stiching("baidu.com",{"q":"test"})"""
     _ = list(args.items())
@@ -46,7 +41,7 @@ class User:
             self.user_information = demjson.decode(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)['data']
         except:
             if DEBUG:
-                with open("DebugLog.txt",'w+') as f:
+                with open("DebugLog.txt",'w') as f:
                     f.write("ERROR:\t Body Message:")
                     f.write(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)
                     f.write("\n at Login time \n")
@@ -144,7 +139,7 @@ class User:
             "CourseID": str(li)
         }
         #教育平台这个POST估计是遗留问题。。。。
-        #之前应该用的是GET，现在POST必须在URL里写data并POSTdata，
+        #之前应该用的是GET，现在POST必须在URL里写data并POST data，
         #否则在Postman里报错了？？？？？？？
         url_argvs = {
             "workid": str(workid),
@@ -171,8 +166,3 @@ class User:
         # API Error ,researching New API
         pass
 
-
-u = User("dongxiaotian","123456qw")
-u.get_homeworks()
-u.homeworks[0]['State'] = False
-u.finish_Homework(u.homeworks[0])
