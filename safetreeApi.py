@@ -48,7 +48,7 @@ class User:
             if DEBUG:
                 with open("DebugLog.txt",'w+') as f:
                     f.write("ERROR:\t Body Message:")
-                    f.write(requests.post(Login_URL, data=demjson.encode(data), headers=header).text)
+                    f.write(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)
                     f.write("\n at Login time \n")
             raise RuntimeError("登录失败")
 
