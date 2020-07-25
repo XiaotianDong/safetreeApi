@@ -8,60 +8,110 @@ Update Time: 7-19
  from safetreeApi import  *
 ```
 
+# 学生类功能
+
 ## 登陆
 
 ```python
-User(username, password) #登录并返回User对象
+Student(Studentname, password) #登录并返回Student对象
 ```
 
 ```
-In[0]: u = User("USER_NAME","USER_PASSWORD")
+In[0]: u = Student("Student_NAME","Student_PASSWORD")
 In[1]: u
-Out[1]: <safetreeApi.User at 0x8ccf748> 
+Out[1]: <safetreeApi.Student at 0x8ccf748> 
 ```
 
 ## 获取作业
 
 ```python
-User.get_homeworks()
+Student.get_homeworks()
 ```
 
 ```
-In[0]: User.get_homeworks()
-In[1]: User.homeworks
+In[0]: Student.get_homeworks()
+In[1]: Student.homeworks
 Out[1]: [{..},{..},..]
 ```
 
 ## 获取安全提醒
 
 ```python
-User.get_safetips(pagesize) #默认为10
+Student.get_safetips(pagesize) #默认为10
 ```
 
 ```
-In[0]: User.get_safetips() //pagesize为需请求安全提醒数量
-In[1]: User.safetips
+In[0]: Student.get_safetips() //pagesize为需请求安全提醒数量
+In[1]: Student.safetips
 Out[1]: [{..},{..},....]
-In[2]: len(User.safetips)
+In[2]: len(Student.safetips)
 Out[2]: 10
 ```
 
 ## 完成作业
 
 ```python
-User.finish_Homework(homework) #homework为User.homeworks中的任意字典或符合其规范的任一字典
+Student.finish_Homework(homework) #homework为Student.homeworks中的任意字典或符合其规范的任一字典
 ```
 
 ```
-In[0]: User.finish_Homework(homework)
+In[0]: Student.finish_Homework(homework)
 out[0]: True
 ```
 
 ## 完成安全提醒
 
 ```python
-User.read_tips(tip) #tip为User.safetips中的任意字典或符合其规范的任一字典
+Student.read_tips(tip) #tip为Student.safetips中的任意字典或符合其规范的任一字典
 ```
 
 #### 暂未实现
 
+
+
+# 教师类功能
+
+## 登录
+
+```python
+teacher(TEACHER_NAME,TEACHER_PASSWORD)
+```
+
+```python
+In[0]: teacher = teacher("EXAMPLE","EXAMPLE")
+```
+
+## 获取学生信息
+
+```python
+teacher.get_students_information()
+```
+
+```python
+In[0]: teacher = teacher("EXAMPLE","EXAMPLE")
+In[1]: teacher.get_students_information()
+In[2]: teacher.students
+Out:[2]:  [<safetreeApi.Student at 0x8c14888>,.......]
+```
+
+## 重置学生密码
+
+```python
+teacher.reset_student_password(StudentClass)
+```
+
+```python
+In[0]: teacher = teacher("EXAMPLE","EXAMPLE")
+In[1]: teacher.get_students_information()
+In[2]: teacher.reset_student_password(teacher.students[0])
+Out[2]: True
+```
+```
+OR
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+<ipython-input-5-782790b0e305> in <module>
+----> 2  teacher.reset_student_password(teacher.students[0])
+
+RuntimeError: Can't reset studnet Password.
+```
