@@ -21,10 +21,10 @@ def url_stitching(url, args):
     return url
 
 
-class User:
+class Student:
     homeworks = []
     safetips = []
-    def __init__(self, username=None, password=None):
+    def __init__(self, username=None, password="123456"):
         LOGIN_URL = "http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin"
         self.user_information = dict()
         header = {
@@ -166,3 +166,36 @@ class User:
         # API Error ,researching New API
         pass
 
+
+class teacher:
+    students = []
+    def __init__(self, username, password):
+        LOGIN_URL = "http://appapi.safetree.com.cn/usercenter/api/v1/account/PostLogin"
+        self.user_information = dict()
+        header = {
+            "User-Agent": User_Agent,
+            "Accept": "application/json",
+            "Connection": "Keep-Alive",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "Username": username,
+            "Password": password
+        }
+        try:
+            self.user_information = demjson.decode(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)['data']
+        except:
+            if DEBUG:
+                with open("DebugLog.txt",'w') as f:
+                    f.write("ERROR:\t Body Message:")
+                    f.write(requests.post(LOGIN_URL, data=demjson.encode(data), headers=header).text)
+                    f.write("\n at Login time \n")
+            raise RuntimeError("登录失败")
+
+    
+    def get_students_information(self):
+        pass
+    
+    
+    def reset_student_password(self,student):
+        pass 
