@@ -70,6 +70,7 @@ Student.read_tips(tip) #tip为Student.safetips中的任意字典或符合其规�
 
 
 # 教师类功能
+# UNAVAILABLE!!
 
 ## 登录
 
