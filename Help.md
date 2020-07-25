@@ -11,7 +11,8 @@ Update Time: 7-19
 ## 登陆
 
 ```python
-User(username, password) #登录并返回User对象
+#学生
+Student(username, password) #登录并返回User对象
 ```
 
 ```

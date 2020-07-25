@@ -10,10 +10,6 @@ User_Agent = "Mozilla/5.0 (Linux; Android 5.1.1; Generic Android-x86 Build/LMY48
 DEBUG = False
 
 
-def set_Debug_state(state):
-    global DEBUG
-    DEBUG = True
-
 def url_stitching(url, args):
     """用于拼接URL，e.g : url_stiching("baidu.com",{"q":"test"})"""
     _ = list(args.items())
